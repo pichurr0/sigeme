@@ -62,10 +62,10 @@ class MedioSerializer(serializers.Serializer):
     ubicacion = UbicacionSerializer()
 
     class Meta:
-        # model = Medio
+        model = Medio
         fields = ['id', 'tipo', 'serie', 'marca', 'modelo', 'estado', 'ubicacion']
-        # read_only_fields = ['creacion', 'modificacion']
-        # depth = 1  # revisar denuevo esto para que es
+        read_only_fields = ['creacion', 'modificacion']
+        depth = 1  # revisar denuevo esto para que es
 
 
 class ComponenteSerializer(MedioSerializer, serializers.ModelSerializer):

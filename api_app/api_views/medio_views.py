@@ -31,6 +31,7 @@ class ListMedio(APIView):
 
         search = request.query_params.get('search')
         searching = search is not None
+        identifiers = []
 
         if tipo is None:
             queryset = Medio.objects.all()
@@ -39,40 +40,69 @@ class ListMedio(APIView):
 
                 # queryset = Medio.objects.all()
                 query1 = Periferico.objects.filter(
+                	Q(serie__icontains=search) |
                     Q(tipo_periferico__tipo__icontains=search)) \
-                .values("id", "tipo", "marca", "modelo", "estado")  # noqa: E122
+                .values_list("id")  # noqa: E122
 
                 query2 = Equipo.objects.filter(inventario__icontains=search)\
-                .values("id", "tipo", "marca", "modelo", "estado")  # noqa: E122
+                .values("id")  # noqa: E122
 
                 query3 = Computadora.objects.filter(Q(ip__icontains=search) |
                 Q(servicio__icontains=search))\
-                .values("id", "tipo", "marca", "modelo", "estado")  # noqa: E122
+                .values("id")  # noqa: E122
 
                 # union de todos los tipos de medios
-                queryset = query1.union(query2).union(query3)
+                identifiers = query1.union(query2).union(query3)
+                print('identifiers',identifiers)
 
-                queryset = queryset.filter(Q(serie__icontains=search))
-
-            # ordenar 
-            queryset = queryset.order_by("-id")  # .values()
+                # queryset = queryset.filter(Q(serie__icontains=search))
 
         elif tipo is not None and tipo in TipoMedio.values:
-            queryset = Medio.objects(Q(tipo=tipo)).all()
+            
+            queryset = Medio.objects.filter(tipo=tipo)
 
             if searching:
-            	pass
+                
+                if tipo == TipoMedio.COMPUTADORA:
+                    identifiers = Computadora.objects.filter(
+                        Q(ip__icontains=search)
+                        | Q(servicio__icontains=search))
+                elif tipo == TipoMedio.EQUIPO:
+                    identifiers = Equipo.objects.filter(inventario__icontains=search)
+                elif tipo == TipoMedio.PERIFERICO:
+                    identifiers = Periferico.objects.filter(
+                    Q(serie__icontains=search)
+                    | Q(tipo_periferico__tipo__icontains=search))
+                    
 
         else:
             queryset = []
 
+        # this is not optime but i wanna test how look like with inheritance
+        if searching:
+            queryset = Medio.objects.filter(
+                Q(
+                    Q(id__in=identifiers)
+                )
+                &
+                Q(tipo__icontains=search)
+                | Q(serie__icontains=search)
+                | Q(marca__tipo__icontains=search)
+                | Q(modelo__tipo__icontains=search)
+                | Q(estado__tipo__icontains=search)
+                | Q(ubicacion__text__icontains=search)
+                )
+
+        if not tipo is None:
+            queryset = queryset.filter(tipo=tipo)
+
+        # ordenar
+        queryset = queryset.order_by("-id")
+
         paginator = CustomPagination()
         result_page = paginator.paginate_queryset(queryset, request)
 
-        if not searching:
-            serializer = MedioSerializer(result_page, many=True, context={'request': request})
-            response = paginator.get_paginated_response(serializer.data)
-        else:
-            response = paginator.get_paginated_response(queryset)
+        serializer = MedioSerializer(result_page, many=True, context={'request': request})
+        response = paginator.get_paginated_response(serializer.data)
 
         return response

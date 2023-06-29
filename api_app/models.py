@@ -29,6 +29,7 @@ class Ubicacion(models.Model):
     departamento = models.OneToOneField("TipoDepartamento",
                on_delete=models.DO_NOTHING)  # noqa: E128
     piso = models.OneToOneField("TipoPiso", null=True, on_delete=models.DO_NOTHING)  # noqa: E501
+    text = models.CharField(max_length=500,null=True)
 
     class Meta:
         db_table = "api_ubicacion"
