@@ -65,6 +65,9 @@ class Medio(models.Model):
     class Meta:
         # ordering = ['-id']  # ORDER BY not allowed in subqueries of compound statements.
         db_table = "api_medio"
+        indexes = [
+            models.Index(fields=['tipo']),
+        ]
 
     def __str__(self):
         return self.tipo

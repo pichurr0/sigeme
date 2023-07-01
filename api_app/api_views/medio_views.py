@@ -55,9 +55,6 @@ class ListMedio(APIView):
 
                 # union de todos los tipos de medios
                 identifiers = query1.union(query2).union(query3)
-                print('identifiers',identifiers)
-
-                # queryset = queryset.filter(Q(serie__icontains=search))
 
         elif tipo is not None and tipo in TipoMedio.values:
             
