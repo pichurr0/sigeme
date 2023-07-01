@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework import routers
 from .views import UserViewSet, MedioViewSet, ComponenteViewSet, \
       PerifericoViewSet, ComputadoraViewSet, EquipoViewSet
-from api_app.api_views.medio_views import ListMedio
+from api_app.api_views.medio_views import ListMedio, RetrieveDestroyMedio
 
 
 # Routers provide a way of automatically determining the URL conf.
@@ -24,6 +24,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include(simple_router.urls)),
     path('medios/', ListMedio.as_view(), name='medios'),
-    path('medios/<tipo>/', ListMedio.as_view(), name='medios'),
+    path('medios/<pk>/', RetrieveDestroyMedio.as_view(), name='medios'),
     path('auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]

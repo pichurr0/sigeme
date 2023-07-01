@@ -121,8 +121,8 @@ class Componente(Medio):
 
     tipo_componente = models.ForeignKey("TipoComponente", blank=False, on_delete=models.RESTRICT)
     tipo_ram = models.ForeignKey("TipoRam", null=True, on_delete=models.RESTRICT)
-    tipo_capacidad = models.CharField(max_length=200)
-    tipo_frecuencia = models.CharField(max_length=200)
+    tipo_capacidad = models.CharField(max_length=200, null=True)
+    tipo_frecuencia = models.CharField(max_length=200, null=True)
 
     class Meta:
         db_table = "api_componente"

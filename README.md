@@ -1,0 +1,1 @@
+Api to manage basic mediums of TRD enterprise. 
