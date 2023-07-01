@@ -63,7 +63,7 @@ class Medio(models.Model):
     modificacion = models.DateTimeField(default=datetime.now())
 
     class Meta:
-        # ordering = ['-id'] ORDER BY not allowed in subqueries of compound statements.
+        # ordering = ['-id']  # ORDER BY not allowed in subqueries of compound statements.
         db_table = "api_medio"
 
     def __str__(self):

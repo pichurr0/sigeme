@@ -1,10 +1,10 @@
 from django.db.models import Q
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from rest_framework.generics import RetrieveUpdateDestroyAPIView
+from rest_framework.generics import DestroyAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from ..serializer import MedioSerializer, ComputadoraSerializer, EquipoSerializer, PerifericoSerializer
+from ..serializer import MedioSerializer
 from ..pagination import CustomPagination
 from ..nomenclators import TipoMedio
 
@@ -24,7 +24,6 @@ class ListMedio(APIView):
     authentication_classes = []
     permission_classes = []
 
-
     def get(self, request):
         """
         Return a list of all users.
@@ -42,15 +41,16 @@ class ListMedio(APIView):
 
                 # queryset = Medio.objects.all()
                 query1 = Periferico.objects.filter(
-                	Q(serie__icontains=search) |
+                    Q(serie__icontains=search) |
                     Q(tipo_periferico__tipo__icontains=search)) \
                 .values_list("id")  # noqa: E122
 
                 query2 = Equipo.objects.filter(inventario__icontains=search)\
                 .values("id")  # noqa: E122
 
-                query3 = Computadora.objects.filter(Q(ip__icontains=search) |
-                Q(servicio__icontains=search))\
+                query3 = Computadora.objects.filter(
+                    Q(ip__icontains=search)
+                    | Q(servicio__icontains=search))\
                 .values("id")  # noqa: E122
 
                 # union de todos los tipos de medios
@@ -76,7 +76,6 @@ class ListMedio(APIView):
                     Q(serie__icontains=search)
                     | Q(tipo_periferico__tipo__icontains=search))
                     
-
         else:
             queryset = []
 
@@ -108,48 +107,3 @@ class ListMedio(APIView):
         response = paginator.get_paginated_response(serializer.data)
 
         return response
-
-    def post(self, request, tipo=None):
-        pass
-
-
-class RetrieveDestroyMedio(RetrieveUpdateDestroyAPIView):
-    """
-    Manage the crud operation get and delete over medios model
-    """
-    authentication_classes = []
-    permission_classes = []
-    # queryset = Medio.objects.all()
-    # serializer_class = MedioSerializer
-    lookup_field = 'id'
-
-    def retrieve(self, request, pk=None, *args, **kwargs):
-
-        queryset = self.get_queryset().filter(id=pk).first()
-        if queryset.tipo == TipoMedio.COMPUTADORA:
-            queryset = Computadora(queryset)
-            serialized = ComputadoraSerializer(queryset, many=False, context={'request': request})
-        elif queryset.tipo == TipoMedio.EQUIPO:
-            serialized = ComputadoraSerializer(queryset, many=False, context={'request': request})
-        elif queryset.tipo == TipoMedio.PERIFERICO:
-            serialized = ComputadoraSerializer(queryset, many=False, context={'request': request})
-        else:
-            serialized = MedioSerializer(queryset, many=False, context={'request': request})
-
-        return Response(serialized.data,  status=status.HTTP_200_OK)
-
-    # def get(self, request, pk=None):
-    #     print(pk)
-    #     queryset = Medio.objects.filter(id=pk)
-    #     MedioSerializer(queryset, many=False, context={'request': request})
-
-    def destroy(self, request, pk=None, *args, **kwargs):
-        queryset = self.get_queryset().filter(id=pk).first()
-        # queryset.
-        return Response({"msg": "deleted"},  status=status.HTTP_200_OK)
-
-
-# class ManageMedio(RetrieveDestroyAPIView):
-
-#     def update(self, request, pk=None):
-#         pass
