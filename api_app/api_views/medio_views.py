@@ -7,6 +7,7 @@ from rest_framework import status
 from ..serializer import MedioSerializer
 from ..pagination import CustomPagination
 from ..nomenclators import TipoMedio
+from sigeme_project import logger
 
 from api_app.models import Medio, Componente, Equipo, Periferico, Computadora
 
@@ -15,7 +16,7 @@ pagination = CustomPagination()
 
 class ListMedio(APIView):
     """
-    View to list all users in the system.
+    View to list all mediums in the system.
 
     * Requires token authentication.
     * Only admin users are able to access this view.
@@ -33,6 +34,7 @@ class ListMedio(APIView):
         tipo = request.query_params.get('tipo')
         searching = search is not None
         identifiers = []
+        logger.info('tremendoSS')
 
         if tipo is None:
             queryset = Medio.objects.all()
@@ -104,3 +106,20 @@ class ListMedio(APIView):
         response = paginator.get_paginated_response(serializer.data)
 
         return response
+
+
+class ListTipoMedio(APIView):
+    """
+    View to list all types of medium in the system.
+
+    * Requires token authentication.
+    * Only admin users are able to access this view.
+    """
+    authentication_classes = []
+    permission_classes = []
+
+    def get(self, request):
+        data = [ {"value": tipo[0], "label":tipo[1]} for tipo in TipoMedio.choices]
+        response = Response(data, status.HTTP_200_OK)
+        return response
+

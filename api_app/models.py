@@ -48,16 +48,16 @@ class Medio(models.Model):
             default=TipoMedio.EQUIPO,)  # noqa: E128, E501
     serie = models.CharField(max_length=200, blank=True)
     marca = models.ForeignKey("TipoMarca",
-            default=TipoMarca.objects.get(id=1).id,
-            on_delete=models.CASCADE)
-    modelo = models.ForeignKey("TipoModelo",null=True,
-            default=TipoModelo.objects.get(id=1).id,
-            on_delete=models.CASCADE)
-    estado = models.ForeignKey("TipoEstadoMedio", 
-            default=TipoEstadoMedio.objects.get(id=1).id,
-            on_delete=models.CASCADE)
-    ubicacion = models.ForeignKey("Ubicacion", null=True, on_delete=models.CASCADE)
-    responsable = models.ForeignKey("Persona", null=True, on_delete=models.CASCADE)
+            default=TipoMarca.objects.get(id=1).id,  # noqa: E128
+            on_delete=models.CASCADE)  # noqa: E128
+    modelo = models.ForeignKey("TipoModelo", null=True,
+            default=TipoModelo.objects.get(id=1).id,  # noqa: E128
+            on_delete=models.CASCADE)  # noqa: E128
+    estado = models.ForeignKey("TipoEstadoMedio",
+            default=TipoEstadoMedio.objects.get(id=1).id,  # noqa: E128
+            on_delete=models.CASCADE)  # noqa: E128
+    ubicacion = models.ForeignKey("Ubicacion", null=True, on_delete=models.CASCADE)  # noqa: E501
+    responsable = models.ForeignKey("Persona", null=True, on_delete=models.CASCADE)  # noqa: E501
 
     creacion = models.DateTimeField(default=datetime.now())
     modificacion = models.DateTimeField(default=datetime.now())
