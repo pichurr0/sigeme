@@ -119,7 +119,7 @@ class ListTipoMedio(APIView):
     permission_classes = []
 
     def get(self, request):
-        data = [ {"value": tipo[0], "label":tipo[1]} for tipo in TipoMedio.choices]
+        data = [{"value": tipo[0], "label":tipo[1]} for tipo in TipoMedio.choices]
         response = Response(data, status.HTTP_200_OK)
         return response
 

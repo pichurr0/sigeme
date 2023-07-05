@@ -101,22 +101,22 @@ class Periferico(Medio):
 class Computadora(Medio):
     """Computadora."""
 
-    ip = models.CharField(max_length=200)
+    ip = models.GenericIPAddressField()
     sistema_operativo = models.ForeignKey("TipoSistemaOperativo", on_delete=models.RESTRICT)  # noqa: E501
-    servicio = models.CharField(max_length=200)
-    usuario = models.CharField(max_length=200)
     mac = models.CharField(max_length=200)
-    nombrepc = models.CharField(max_length=200)
-    sello = models.CharField(max_length=200)
+    usuario = models.CharField(max_length=200, blank=True, null=True)
+    nombrepc = models.CharField(max_length=200, blank=True, null=True)
+    sello = models.CharField(max_length=200, blank=True, null=True)
     estado_sello = models.ForeignKey("TipoEstadoSello", blank=False, on_delete=models.RESTRICT)  # noqa: E501
     es_servidor = models.BooleanField(default=False)
-    componentes = models.ManyToManyField("Componente", related_name="componentes")  # noqa: E501
+    servicio = models.CharField(max_length=200, blank=True, null=True)
 
     class Meta:
         db_table = "api_computadora"
 
-    def get_componentes(self):
-        pass
+    @property
+    def componentes(self):
+        return Componente.objects.filter(medio=self.id).all()
 
 
 class Componente(Medio):
@@ -126,6 +126,7 @@ class Componente(Medio):
     tipo_ram = models.ForeignKey("TipoRam", null=True, on_delete=models.RESTRICT)
     tipo_capacidad = models.CharField(max_length=200, null=True)
     tipo_frecuencia = models.CharField(max_length=200, null=True)
+    medio = models.ForeignKey("Computadora", blank=False, null=True, on_delete=models.RESTRICT)  # noqa: E501
 
     class Meta:
         db_table = "api_componente"

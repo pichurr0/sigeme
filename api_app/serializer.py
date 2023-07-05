@@ -1,8 +1,11 @@
+from datetime import datetime
+from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .nomenclators import TipoMedio
+from .nomenclators import TipoMedio, TipoMarca, TipoModelo,TipoEstadoMedio, TipoEstadoSello
 from .models import Medio, Componente, Equipo, Periferico, Computadora, Ubicacion
 
+from sigeme_project import logger
 # Serializers define the API representation.
 
 
@@ -20,8 +23,60 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class NomencladorSerializer(serializers.Serializer):
     """Componentes que van dentro de una computadora."""
 
-    id = serializers.IntegerField()
+    id = serializers.IntegerField(label='ID')
     tipo = serializers.CharField()
+
+
+class ValueLabelSerializer(serializers.Serializer):
+    """Serializador para datos que no tienen una representacion en forma de modelo."""
+
+    value = serializers.CharField()
+    label = serializers.CharField()
+
+
+class MarcaSerializer(NomencladorSerializer, serializers.ModelSerializer):
+    """Serializador para datos que no tienen una representacion en forma de modelo."""
+
+    class Meta:
+        model = TipoMarca
+        fields = '__all__'
+    
+    def create(self, validated_data):
+        print('marca serializer')
+
+
+class EstadoSelloSerializer(NomencladorSerializer, serializers.ModelSerializer):
+    """Serializador para datos que no tienen una representacion en forma de modelo."""
+
+    class Meta:
+        model = TipoEstadoSello
+        fields = '__all__'
+    
+    def create(self, validated_data):
+        print('sello serializer')
+
+
+class EstadoMedioSerializer(NomencladorSerializer, serializers.ModelSerializer):
+    """Serializador para datos que no tienen una representacion en forma de modelo."""
+
+    class Meta:
+        model = TipoEstadoMedio
+        fields = '__all__'
+    
+    def create(self, validated_data):
+        print('estado serializer')
+
+
+class ModeloSerializer(NomencladorSerializer, serializers.ModelSerializer):
+    """Serializador para datos que no tienen una representacion en forma de modelo."""
+    
+    marca = serializers.IntegerField(label='ID',read_only=True)
+    class Meta:
+        model = TipoModelo
+        fields = '__all__'
+    
+    def create(self, validated_data):
+        print('modelo serializer')
 
 
 class UbicacionSerializer(serializers.ModelSerializer):
@@ -29,7 +84,7 @@ class UbicacionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ubicacion
-        fields = '__all__'
+        exclude = ['text']
 
 
 class TipoMedioSerializer(serializers.ModelSerializer):
@@ -55,11 +110,19 @@ class MedioSerializer(serializers.Serializer):
     # fixme, me quede intentando de representar las relaciones entre modelos de una forma mas amigable
     # foto = serializers.ImageField(blank=True,null=True)
     tipo = serializers.CharField()
-    serie = serializers.CharField()
-    marca = serializers.CharField()
-    modelo = serializers.CharField()
-    estado = serializers.CharField()
-    ubicacion = UbicacionSerializer()
+    # serie = serializers.CharField()
+    # marca = serializers.CharField()
+    # marca = NomencladorSerializer()
+    marca = MarcaSerializer()
+    modelo = ModeloSerializer()
+    estado = EstadoMedioSerializer()
+    ubicacion = UbicacionSerializer(read_only=True)
+    # creacion = serializers.DateTimeField(
+    #     default=serializers.CreateOnlyDefault(timezone.now)
+    # )
+    # modificacion = serializers.DateTimeField(
+    #     default=datetime.now()
+    # )
 
     class Meta:
         model = Medio
@@ -81,7 +144,7 @@ class ComponenteSerializer(MedioSerializer, serializers.ModelSerializer):
         fields = '__all__'
 
 
-class EquipoSerializer(MedioSerializer,serializers.ModelSerializer):
+class EquipoSerializer(MedioSerializer, serializers.ModelSerializer):
     """Componentes que van dentro de una computadora."""
 
     inventario = serializers.CharField()
@@ -92,7 +155,7 @@ class EquipoSerializer(MedioSerializer,serializers.ModelSerializer):
 
 
 class PerifericoSerializer(MedioSerializer,serializers.ModelSerializer):
-    """Componentes que van dentro de una computadora."""
+    """Equipos que son perifericos a la computadora."""
 
     conectado_a = serializers.CharField()
     tipo_periferico = serializers.CharField()
@@ -102,7 +165,7 @@ class PerifericoSerializer(MedioSerializer,serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ComputadoraSerializer(MedioSerializer,serializers.ModelSerializer):
+class ComputadoraSerializer(MedioSerializer, serializers.ModelSerializer):
     """Componentes que van dentro de una computadora."""
 
     sello = serializers.CharField()
@@ -110,3 +173,31 @@ class ComputadoraSerializer(MedioSerializer,serializers.ModelSerializer):
     class Meta:
         model = Computadora
         fields = '__all__'
+
+    def create(self, validated_data):
+        """
+        Fue necesario sobrescribir este metodo
+        """
+
+        print('en el serializer.py')
+        # logger.info(f'dentro de serialize {validated_data}')
+
+        # computadora = Computadora()
+        data = validated_data
+        marca = TipoMarca.objects.filter(id=validated_data['marca']['id']).first()
+        if marca:
+            data['marca'] = marca
+
+        modelo = TipoModelo.objects.filter(id=validated_data['modelo']['id']).first()
+        if modelo:
+            data['modelo'] = modelo
+
+        estado = TipoEstadoMedio.objects.filter(id=validated_data['estado']['id']).first()
+        if estado:
+            data['estado'] = estado
+
+        # estado_sello = TipoModelo.objects.filter(id=validated_data['modelo']['id']).first()
+        # if estado_sello:
+        #     data['modelo'] = estado_sello
+
+        return Computadora.objects.create(**data)

@@ -100,7 +100,7 @@ class TipoDepartamento(models.Model):
     division = models.OneToOneField("TipoDivision", on_delete=models.CASCADE)
 
     def __str__(self):
-        return '%d, DIV: %s' % (self.tipo, self.division)
+        return f'{self.tipo} - {self.division.tipo}'
 
     class Meta:
         verbose_name = "departamento"
@@ -211,9 +211,10 @@ class TipoSistemaOperativo(models.Model):
     """Sistemas Operativos."""
 
     tipo = models.CharField(max_length=200)
+    version = models.CharField(max_length=20, default='10')
 
     def __str__(self):
-        return self.tipo
+        return f'{self.tipo} {self.version}'
 
     class Meta:
         verbose_name = "sistema operativo"
