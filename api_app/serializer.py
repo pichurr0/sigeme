@@ -70,7 +70,8 @@ class EstadoMedioSerializer(NomencladorSerializer, serializers.ModelSerializer):
 class ModeloSerializer(NomencladorSerializer, serializers.ModelSerializer):
     """Serializador para datos que no tienen una representacion en forma de modelo."""
     
-    marca = serializers.IntegerField(label='ID',read_only=True)
+    marca = serializers.IntegerField(label='ID', read_only=True)
+
     class Meta:
         model = TipoModelo
         fields = '__all__'
@@ -81,6 +82,12 @@ class ModeloSerializer(NomencladorSerializer, serializers.ModelSerializer):
 
 class UbicacionSerializer(serializers.ModelSerializer):
     """Serializador de Ubicacion."""
+   
+    id = serializers.IntegerField(label='ID')
+    division = NomencladorSerializer(read_only=True)
+    municipio = NomencladorSerializer(read_only=True)
+    unidad = NomencladorSerializer(read_only=True)
+    departamento = NomencladorSerializer(read_only=True)
 
     class Meta:
         model = Ubicacion
@@ -110,19 +117,20 @@ class MedioSerializer(serializers.Serializer):
     # fixme, me quede intentando de representar las relaciones entre modelos de una forma mas amigable
     # foto = serializers.ImageField(blank=True,null=True)
     tipo = serializers.CharField()
-    # serie = serializers.CharField()
+    serie = serializers.CharField()
     # marca = serializers.CharField()
     # marca = NomencladorSerializer()
     marca = MarcaSerializer()
     modelo = ModeloSerializer()
     estado = EstadoMedioSerializer()
-    ubicacion = UbicacionSerializer(read_only=True)
-    # creacion = serializers.DateTimeField(
-    #     default=serializers.CreateOnlyDefault(timezone.now)
-    # )
-    # modificacion = serializers.DateTimeField(
-    #     default=datetime.now()
-    # )
+    ubicacion = UbicacionSerializer()
+    creacion = serializers.DateTimeField(
+        default=serializers.CreateOnlyDefault(timezone.now)
+    )
+    modificacion = serializers.DateTimeField(
+        read_only=True,
+        default=datetime.now()
+    )
 
     class Meta:
         model = Medio
@@ -169,6 +177,7 @@ class ComputadoraSerializer(MedioSerializer, serializers.ModelSerializer):
     """Componentes que van dentro de una computadora."""
 
     sello = serializers.CharField()
+    estado_sello = NomencladorSerializer()
 
     class Meta:
         model = Computadora
@@ -196,8 +205,12 @@ class ComputadoraSerializer(MedioSerializer, serializers.ModelSerializer):
         if estado:
             data['estado'] = estado
 
-        # estado_sello = TipoModelo.objects.filter(id=validated_data['modelo']['id']).first()
-        # if estado_sello:
-        #     data['modelo'] = estado_sello
+        ubicacion = Ubicacion.objects.filter(id=validated_data['ubicacion']['id']).first()
+        if ubicacion:
+            data['ubicacion'] = ubicacion
+
+        estado_sello = TipoEstadoSello.objects.filter(id=validated_data['estado_sello']['id']).first()
+        if estado_sello:
+            data['estado_sello'] = estado_sello
 
         return Computadora.objects.create(**data)

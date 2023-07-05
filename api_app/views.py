@@ -55,33 +55,14 @@ class ComputadoraViewSet(viewsets.ModelViewSet):
     permission_classes = []
 
     def create(self, request):
-        print('eeee')
-        # print(vars(self))
    
         data = request.data
-        print('data', data)
         serializer = self.serializer_class(data=data)
-        print('serialized---- is valid------')
-        print(serializer.is_valid(raise_exception=True))
-        if not serializer.is_valid():
+        if not serializer.is_valid(raise_exception=True):
             HttpResponse(serializer.errors)
-        print('serialized', serializer)
-        print(serializer.validated_data)
         entity = serializer.save()
-        print('serialized----------', entity)
         entity.save()
-        # entity = self.perform_create(serializer)
-        # entity = Computadora(
-        #     creacion=datetime.now(),
-        #     modificacion=datetime.now()
-        #     )
-        # entity.save()
-    
         return HttpResponse('ok')
-        # print(vars(request))
-        # print(ComputadoraSerializer(request))
-        # computadora = Computadora(       
-        #     )
 
 
 def pingView(request):
