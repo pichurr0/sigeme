@@ -17,7 +17,6 @@ class ComponenteViewSet(viewsets.ModelViewSet):
     permission_classes = []
 
 
-
 # ViewSets define the view behavior.
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer

@@ -125,11 +125,11 @@ class MedioSerializer(serializers.Serializer):
     estado = EstadoMedioSerializer()
     ubicacion = UbicacionSerializer()
     creacion = serializers.DateTimeField(
-        default=serializers.CreateOnlyDefault(timezone.now)
+        default=serializers.CreateOnlyDefault(datetime.now())
     )
     modificacion = serializers.DateTimeField(
         read_only=True,
-        default=datetime.now()
+        default=timezone.now()
     )
 
     class Meta:

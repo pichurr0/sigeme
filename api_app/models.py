@@ -1,5 +1,6 @@
 from datetime import datetime
 from django.db import models
+from django.utils import timezone
 from api_app.nomenclators import *
 
 # "CONCRETE TABLE INHERITANCE" en modelo Medio, [No se puede implementar con
@@ -60,7 +61,7 @@ class Medio(models.Model):
     responsable = models.ForeignKey("Persona", null=True, on_delete=models.CASCADE)  # noqa: E501
 
     creacion = models.DateTimeField(default=datetime.now())
-    modificacion = models.DateTimeField(default=datetime.now())
+    modificacion = models.DateTimeField(default=timezone.now())
 
     class Meta:
         # ordering = ['-id']  # ORDER BY not allowed in subqueries of compound statements.
