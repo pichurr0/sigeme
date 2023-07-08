@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .nomenclators import TipoMarca, TipoModelo, \
     TipoDivision, TipoMunicipio, TipoUnidad, TipoDepartamento, \
-    TipoPiso, TipoEstadoMedio, TipoEstadoSello, TipoComponente, \
+    TipoPiso, TipoEstadoSello, TipoComponente, \
     TipoProvincia, TipoPeriferico, TipoRam, TipoPrograma, \
     TipoSistemaOperativo
 
@@ -16,6 +16,10 @@ class TipoPerifericoAdmin(admin.ModelAdmin):
     ]
 
 
+# @admin.register(FilmGenre)
+# class FilmGenreAdmin(admin.ModelAdmin):
+#     readonly_fields = ["slug"]
+
 admin.site.register(TipoMarca)
 admin.site.register(TipoModelo)
 admin.site.register(TipoProvincia)
@@ -24,7 +28,6 @@ admin.site.register(TipoMunicipio)
 admin.site.register(TipoDepartamento)
 admin.site.register(TipoUnidad)
 admin.site.register(TipoPiso)
-admin.site.register(TipoEstadoMedio)
 admin.site.register(TipoEstadoSello)
 admin.site.register(TipoComponente)
 admin.site.register(TipoPeriferico, TipoPerifericoAdmin)

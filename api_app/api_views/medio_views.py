@@ -34,7 +34,7 @@ class ListMedio(APIView):
         tipo = request.query_params.get('tipo')
         searching = search is not None
         identifiers = []
-        logger.info('tremendoSS')
+        
 
         if tipo is None:
             queryset = Medio.objects.all()
@@ -100,6 +100,7 @@ class ListMedio(APIView):
         queryset = queryset.order_by("-id")
 
         paginator = CustomPagination()
+        # logger.info('tremendoSS', queryset)
         result_page = paginator.paginate_queryset(queryset, request)
 
         serializer = MedioSerializer(result_page, many=True, context={'request': request})

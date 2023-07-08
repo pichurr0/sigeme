@@ -10,6 +10,12 @@ class TipoMedio(models.TextChoices):
     COMPONENTE = "componente", _("Componente")
 
 
+class TipoEstadoMedio(models.TextChoices):
+    """TipoEstadoMedio. """
+    BIEN = "bien", _("Bien")
+    REPARACION = "reparacion", _("Reparacion")
+    ROTO = "roto", _("Roto")
+
 class TipoMarca(models.Model):
     """TipoMarca."""
 
@@ -119,19 +125,6 @@ class TipoPiso(models.Model):
     class Meta:
         verbose_name = "no. piso"
         verbose_name_plural = "no. de pisos"
-
-
-class TipoEstadoMedio(models.Model):
-    """Para este modelo se puede usar un discionario de palabras inmutables."""
-
-    tipo = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.tipo
-
-    class Meta:
-        verbose_name = "estado del medio"
-        verbose_name_plural = "estados de los medios"
 
 
 class TipoEstadoSello(models.Model):

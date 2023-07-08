@@ -53,9 +53,9 @@ class Medio(models.Model):
     modelo = models.ForeignKey("TipoModelo", null=True,
             default=TipoModelo.objects.get(id=1).id,  # noqa: E128
             on_delete=models.CASCADE)  # noqa: E128
-    estado = models.ForeignKey("TipoEstadoMedio",
-            default=TipoEstadoMedio.objects.get(id=1).id,  # noqa: E128
-            on_delete=models.CASCADE)  # noqa: E128
+    estado = models.CharField(max_length=21, null=False, blank=False,
+            choices=TipoEstadoMedio.choices,  # noqa: E128
+            default=TipoEstadoMedio.BIEN,)  # noqa: E128, E501
     ubicacion = models.ForeignKey("Ubicacion", null=True, on_delete=models.CASCADE)  # noqa: E501
     responsable = models.ForeignKey("Persona", null=True, on_delete=models.CASCADE)  # noqa: E501
 

@@ -2,7 +2,7 @@ from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .nomenclators import TipoMedio, TipoMarca, TipoModelo,TipoEstadoMedio, TipoEstadoSello
+from .nomenclators import TipoMedio, TipoMarca, TipoModelo, TipoEstadoMedio, TipoEstadoSello
 from .models import Medio, Componente, Equipo, Periferico, Computadora, Ubicacion
 
 from sigeme_project import logger
@@ -70,7 +70,7 @@ class EstadoMedioSerializer(NomencladorSerializer, serializers.ModelSerializer):
 class ModeloSerializer(NomencladorSerializer, serializers.ModelSerializer):
     """Serializador para datos que no tienen una representacion en forma de modelo."""
     
-    marca = serializers.IntegerField(label='ID', read_only=True)
+    # marca = MarcaSerializer( read_only=True)
 
     class Meta:
         model = TipoModelo
@@ -134,7 +134,7 @@ class MedioSerializer(serializers.Serializer):
 
     class Meta:
         model = Medio
-        fields = ['id', 'tipo', 'serie', 'marca', 'modelo', 'estado', 'ubicacion']
+        fields = ['id', 'tipo', 'serie', ] # 'marca', 'modelo', 'estado', 'ubicacion'
         read_only_fields = ['creacion', 'modificacion']
         depth = 1  # revisar denuevo esto para que es
 
@@ -162,7 +162,7 @@ class EquipoSerializer(MedioSerializer, serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PerifericoSerializer(MedioSerializer,serializers.ModelSerializer):
+class PerifericoSerializer(MedioSerializer, serializers.ModelSerializer):
     """Equipos que son perifericos a la computadora."""
 
     conectado_a = serializers.CharField()
