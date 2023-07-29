@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class TipoMedio(models.TextChoices):
-    """TipoMedio."""
+    """Tipo Medio."""
     EQUIPO = "equipo", _("Equipo")
     PERIFERICO = "periferico", _("Periferico")
     COMPUTADORA = "computadora", _("Computadora")
@@ -11,10 +11,38 @@ class TipoMedio(models.TextChoices):
 
 
 class TipoEstadoMedio(models.TextChoices):
-    """TipoEstadoMedio. """
+    """Tipo Estado Medio. """
     BIEN = "bien", _("Bien")
     REPARACION = "reparacion", _("Reparacion")
     ROTO = "roto", _("Roto")
+
+
+class TipoComponente(models.TextChoices):
+    """Tipo Componente."""
+
+    RAM = "ram", _("Ram")
+    DISCO = "disco", _("Disco Duro")
+
+
+class TipoRam(models.TextChoices):
+    """Tipo Ram.
+    tambien se puede escribir asi
+    choices=models.TextChoices("Ram", "DDR1 DDR2 DDR3 DDR4").choices
+    """
+
+    DDR1 = "ddr1"
+    DDR2 = "ddr2"
+    DDR3 = "ddr3"
+    DDR4 = "ddr4"
+
+
+class TipoEstadoSello(models.TextChoices):
+    """Tipo estado de sello."""
+
+    BIEN = "B"
+    SIN_SELLO = "S"
+    ROTO = "R"
+
 
 class TipoMarca(models.Model):
     """TipoMarca."""
@@ -117,7 +145,7 @@ class TipoPiso(models.Model):
     """TipoPiso."""
 
     tipo = models.CharField(max_length=200)
-    division = models.OneToOneField("TipoUnidad", on_delete=models.CASCADE)
+    unidad = models.OneToOneField("TipoUnidad", on_delete=models.CASCADE)
 
     def __str__(self):
         return self.tipo
@@ -127,45 +155,15 @@ class TipoPiso(models.Model):
         verbose_name_plural = "no. de pisos"
 
 
-class TipoEstadoSello(models.Model):
-    """Para este modelo se puede usar un discionario de palabras inmutables."""
-
-    tipo = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.tipo
-
-    class Meta:
-        verbose_name = "estado del sello"
-        verbose_name_plural = "estado de los sellos"
-
-
-class TipoComponente(models.Model):
-    """
-    Los componentes que se pueden encontrar dentro de un medio de tipo PC.
-
-    ej: disco duro, ram, fuente.
-    """
-
-    tipo = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.tipo
-
-    class Meta:
-        verbose_name = "componente"
-        verbose_name_plural = "componentes"
-
-
 class TipoPeriferico(models.Model):
     """
     Los componentes que se pueden encontrar dentro de un medio de tipo PC.
 
-    ej: disco duro, ram, fuente.
+    ej: impresora, teclado, mouse.
     """
 
     tipo = models.CharField(max_length=200)
-    slug = models.CharField(max_length=50,null=True)
+    slug = models.CharField(max_length=50, null=True)
 
     def __str__(self):
         return self.tipo
@@ -173,19 +171,6 @@ class TipoPeriferico(models.Model):
     class Meta:
         verbose_name = "tipo de periferico"
         verbose_name_plural = "tipos de perifericos"
-
-
-class TipoRam(models.Model):
-    """TipoRam."""
-
-    tipo = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.tipo
-
-    class Meta:
-        verbose_name = "tipo de memoria ram"
-        verbose_name_plural = "tipos de memoria ram"
 
 
 class TipoPrograma(models.Model):

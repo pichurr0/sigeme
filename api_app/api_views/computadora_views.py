@@ -1,22 +1,22 @@
+from sigeme_project import logger
 from django.db.models import Q
 from rest_framework.decorators import action
 from rest_framework.views import APIView
-from rest_framework.generics import DestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from ..serializer import MedioSerializer
+from ..serializer import ComponenteSerializer
 from ..pagination import CustomPagination
 from ..nomenclators import TipoMedio
-from sigeme_project import logger
-
+from ..views import ComponenteViewSet
 from api_app.models import Medio, Componente, Equipo, Periferico, Computadora
 
 pagination = CustomPagination()
 
 
-class ListMedio(APIView):
+class ListComponentesComputadora(APIView):
     """
-    View to list all componente of a medium in the system.
+    Listar todos los componentes de una computadora
 
     * Requires token authentication.
     * Only admin users are able to access this view.
@@ -25,84 +25,54 @@ class ListMedio(APIView):
     authentication_classes = []
     permission_classes = []
 
-    def get(self, request):
+    def get(self, request, pk, **kwargs):
         """
         Return a list of all users.
         """
+        result = Componente.objects.filter(medio=pk)
 
-        search = request.query_params.get('search')
-        tipo = request.query_params.get('tipo')
-        searching = search is not None
-        identifiers = []
-        logger.info('tremendoSS')
+        serializer = ComponenteSerializer(result, many=True, context={'request': request})
 
-        if tipo is None:
-            queryset = Medio.objects.all()
+        return Response(serializer.data)
 
-            if searching:
+    def post(self, request, pk=None, **kwargs):
 
-                # queryset = Medio.objects.all()
-                query1 = Periferico.objects.filter(
-                    Q(serie__icontains=search) |
-                    Q(tipo_periferico__tipo__icontains=search)) \
-                .values_list("id")  # noqa: E122
+        data = request.data
+        data['medio'] = pk
+        serializer = ComponenteSerializer(data=data)
+        if not serializer.is_valid(raise_exception=True):
+            return Response(serializer.errors)
+        serializer.save()  # retorna la entidad ej: entity=serializer.save() 
+        return Response(serializer.data)
 
-                query2 = Equipo.objects.filter(inventario__icontains=search)\
-                .values("id")  # noqa: E122
 
-                query3 = Computadora.objects.filter(
-                    Q(ip__icontains=search)
-                    | Q(servicio__icontains=search))\
-                .values("id")  # noqa: E122
+class RetrieveDestroyComponenteComputadora(RetrieveUpdateDestroyAPIView):
+    """
+    Obtener Actualizar y Eliminar Componente de computadora
+    """
+    queryset = Componente.objects.all()
+    serializer_class = ComponenteSerializer
 
-                # union de todos los tipos de medios
-                identifiers = query1.union(query2).union(query3)
+    def get(self, request, pk=None, pk_comp=None, **kwargs):
+        """
+        self.get_object() lanza excepcion porque no existe un componente con pk de computadora
+        """
+        logger.info('obteniendo componentet de computadora')
+        try:
+            instance = self.queryset.filter(Q(medio__id=pk) & Q(id=pk_comp)).first()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        except Exception as err:
+            print('error', err )
+            return Response(str(err))
 
-        elif tipo is not None and tipo in TipoMedio.values:
-            
-            queryset = Medio.objects.filter(tipo=tipo)
+    def put(self, request, pk=None, pk_comp=None, *args, **kwargs):
+        return ComponenteViewSet.update(request, pk=pk_comp, *args, **kwargs)
 
-            if searching:
-                
-                if tipo == TipoMedio.COMPUTADORA:
-                    identifiers = Computadora.objects.filter(
-                        Q(ip__icontains=search)
-                        | Q(servicio__icontains=search))
-                elif tipo == TipoMedio.EQUIPO:
-                    identifiers = Equipo.objects.filter(inventario__icontains=search)
-                elif tipo == TipoMedio.PERIFERICO:
-                    identifiers = Periferico.objects.filter(
-                    Q(serie__icontains=search)
-                    | Q(tipo_periferico__tipo__icontains=search))
-                    
-        else:
-            queryset = []
+    def delete(self, request, pk=None, pk_comp=None, *args, **kwargs):
+        instance = self.queryset.filter(Q(medio__id=pk) & Q(id=pk_comp)).first()
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-        # this is not optime but i wanna test how look like with inheritance
-        if searching:
-            queryset = Medio.objects.filter(
-                Q(
-                    Q(id__in=identifiers)
-                )
-                &
-                Q(tipo__icontains=search)
-                | Q(serie__icontains=search)
-                | Q(marca__tipo__icontains=search)
-                | Q(modelo__tipo__icontains=search)
-                | Q(estado__tipo__icontains=search)
-                | Q(ubicacion__text__icontains=search)
-                )
 
-        if not tipo is None:
-            queryset = queryset.filter(tipo=tipo)
 
-        # ordenar
-        queryset = queryset.order_by("-id")
-
-        paginator = CustomPagination()
-        result_page = paginator.paginate_queryset(queryset, request)
-
-        serializer = MedioSerializer(result_page, many=True, context={'request': request})
-        response = paginator.get_paginated_response(serializer.data)
-
-        return response
