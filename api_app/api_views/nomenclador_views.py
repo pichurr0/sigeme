@@ -8,11 +8,12 @@ from ..nomenclators import TipoMedio, TipoEstadoMedio, \
 class ListTipoMedio(APIView):
     """
     Listar todos los tipos de medios del sistema
-    * Requires token authentication.
+
+    * No Requires token authentication.
     * Only admin users are able to access this view.
     """
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = ()
+    permission_classes = ()
 
     def get(self, request):
         data = [{"value": tipo[0], "label":tipo[1]} for tipo in TipoMedio.choices]
@@ -24,11 +25,11 @@ class ListTipoEstadoMedio(APIView):
     """
     Listar los estados del medio
 
-    * Requires token authentication.
+    * No Requires token authentication.
     * Only admin users are able to access this view.
     """
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = ()
+    permission_classes = ()
 
     def get(self, request):
         data = [{"value": tipo[0], "label":tipo[1]} for tipo in TipoEstadoMedio.choices]
@@ -40,11 +41,11 @@ class ListTipoComponente(APIView):
     """
     Listar los tipos de componentes
 
-    * Requires token authentication.
+    * No Requires token authentication.
     * Only admin users are able to access this view.
     """
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = ()
+    permission_classes = ()
 
     def get(self, request):
         data = [{"value": tipo[0], "label":tipo[1]} for tipo in TipoComponente.choices]
@@ -56,7 +57,7 @@ class ListTipoRam(APIView):
     """
     Listar los tipos de ram
 
-    * Requires token authentication.
+    * No Requires token authentication.
     * Only admin users are able to access this view.
     """
     authentication_classes = []
@@ -72,11 +73,11 @@ class ListTipoEstadoSello(APIView):
     """
     Listar los tipos de ram
 
-    * Requires token authentication.
+    * No Requires token authentication.
     * Only admin users are able to access this view.
     """
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = ()
+    permission_classes = ()
 
     def get(self, request):
         data = [{"value": tipo[0], "label":tipo[1]} for tipo in TipoEstadoSello.choices]

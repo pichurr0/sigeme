@@ -1,6 +1,7 @@
 from sigeme_project import logger
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from ..serializer import MovimientoSerializer, MovimientoComponenteSerializer
 from ..pagination import CustomPagination
@@ -17,8 +18,8 @@ class ListMovimiento(APIView):
     * Only admin users are able to access this view.
     """
 
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None, **kwargs):
         """
@@ -42,8 +43,8 @@ class ListMovimientoComponente(APIView):
     * Requires token authentication.
     * Only admin users are able to access this view.
     """
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk=None, **kwargs):
         """

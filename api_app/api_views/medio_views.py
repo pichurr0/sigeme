@@ -1,14 +1,11 @@
+from sigeme_project import logger
 from django.db.models import Q
-from rest_framework.decorators import action
 from rest_framework.views import APIView
-from rest_framework.generics import DestroyAPIView
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from ..serializer import MedioSerializer
 from ..pagination import CustomPagination
 from ..nomenclators import TipoMedio
-from sigeme_project import logger
-
 from api_app.models import Medio, Equipo, Periferico, Computadora
 
 pagination = CustomPagination()
@@ -22,8 +19,8 @@ class ListarMedio(APIView):
     * Only admin users are able to access this view.
     """
 
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         """
@@ -34,7 +31,6 @@ class ListarMedio(APIView):
         tipo = request.query_params.get('tipo')
         searching = search is not None
         identifiers = []
-        
 
         if tipo is None:
             queryset = Medio.objects.all()
