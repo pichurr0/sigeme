@@ -1,27 +1,13 @@
-import json
 from sigeme_project import logger
-from django.test import TestCase, Client, tag
-from django.core.exceptions import ObjectDoesNotExist
-from rest_framework.test import APIRequestFactory, APIClient
+from django.test import TestCase, RequestFactory, Client, tag
 from ..models import Equipo, Computadora, Ubicacion, Periferico, Componente, \
       Movimiento, MovimientoComponente
-from ..nomenclators import TipoMedio, TipoMarca, TipoModelo, \
-       TipoDepartamento, TipoDivision, \
-       TipoMunicipio, TipoProvincia, TipoUnidad, TipoPiso, \
-       TipoEstadoSello, TipoSistemaOperativo, TipoPeriferico
+from ..nomenclators import TipoPeriferico, TipoMarca, TipoModelo, \
+       TipoDepartamento, TipoDivision, TipoSistemaOperativo, TipoEstadoSello, \
+       TipoMunicipio, TipoProvincia, TipoUnidad, TipoPiso
 
 # en caso de necesitar validacion para csrf, pasar parametro al client
 # csrf_client = Client(enforce_csrf_checks=True)
-
-# definir headers
-# client = Client(headers={"user-agent": "curl/7.79.1"})
-
-# c = Client()
-# response = c.post("/login/", {"username": "john", "password": "smith"})
-# response.status_code
-
-# response = c.get("/customer/details/")
-# response.content
 
 
 @tag('core')
