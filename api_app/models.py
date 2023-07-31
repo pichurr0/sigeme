@@ -36,7 +36,8 @@ class Ubicacion(models.Model):
         db_table = "api_ubicacion"
     
     def __str__(self):
-         return f'{self.division.tipo}, {self.municipio.tipo}, {self.departamento.tipo}, {self.unidad.tipo}, {self.piso.tipo}'
+        return f'{self.division.tipo}, {self.municipio.tipo},'
+        f'{self.departamento.tipo}, {self.unidad.tipo}, {self.piso.tipo}'
 
 
 class Medio(models.Model):

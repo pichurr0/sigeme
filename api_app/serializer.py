@@ -3,20 +3,34 @@ from datetime import datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 from .nomenclators import TipoMedio, TipoMarca, TipoModelo, TipoSistemaOperativo, TipoPeriferico
 from .models import Medio, Componente, Equipo, Periferico, Computadora, \
     Ubicacion, MovimientoComponente, Movimiento
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    """Serializaror de Usuarios.
+class UserSerializer(serializers.ModelSerializer):
+    """Serializaror de Usuarios. 
+     antes serializers.HyperlinkedModelSerializer de tal
+     forma que se ponian los atributos url y is_staff
 
        Este modelo en la api tendra un atributo url en el que se podran ver todos los detalles del mismo
     """
 
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'is_staff']
+        fields = ['username', 'email', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = User(
+                email=validated_data['email'],
+                username=validated_data['username']
+                )
+        user.set_password(validated_data['password'])
+        user.save()
+        Token.objects.create(user=user)
+        return user
 
 
 class NomencladorSerializer(serializers.Serializer):

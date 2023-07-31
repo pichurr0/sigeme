@@ -1,15 +1,15 @@
 import logging
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.contrib.auth.models import User
-from rest_framework import viewsets, status
+from django.contrib.auth import authenticate
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets, status, generics, views
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
 from .serializer import UserSerializer, MedioSerializer, ComponenteSerializer,\
 EquipoSerializer, PerifericoSerializer, ComputadoraSerializer
 from .models import Medio, Componente, Equipo, Periferico, Computadora
-
 
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,9 @@ logger = logging.getLogger(__name__)
 class ComponenteViewSet(viewsets.ModelViewSet):
     serializer_class = ComponenteSerializer
     queryset = Componente.objects.all()
-    permission_classes = []
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request):
         data = request.data
@@ -47,16 +49,15 @@ class ComponenteViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-# ViewSets define the view behavior.
-class UserViewSet(viewsets.ModelViewSet):
+class UserCreate(generics.CreateAPIView):
     serializer_class = UserSerializer
-    queryset = User.objects.all()
 
 
 class EquipoViewSet(viewsets.ModelViewSet):
     serializer_class = EquipoSerializer
     queryset = Equipo.objects.all()
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request):
         data = request.data
@@ -80,7 +81,8 @@ class EquipoViewSet(viewsets.ModelViewSet):
 class PerifericoViewSet(viewsets.ModelViewSet):
     serializer_class = PerifericoSerializer
     queryset = Periferico.objects.all()
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request):
         data = request.data
@@ -100,10 +102,12 @@ class PerifericoViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response(serializer.data)
 
+
 class ComputadoraViewSet(viewsets.ModelViewSet):
     serializer_class = ComputadoraSerializer
     queryset = Computadora.objects.all()
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request):
         data = request.data
@@ -114,17 +118,21 @@ class ComputadoraViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class MedioViewSet(viewsets.ModelViewSet):
-    serializer_class = MedioSerializer
-    queryset = Medio.objects.all()
-    lookup_field = 'tipo'
-
-    @action(methods=['get'], detail=False, permission_classes=[],
-            url_path='', url_name='medios-list')
-    def get_all(self, request, pk='id'):
-        print('eeee')
-        print(request)
-        exit()
+class LoginView(views.APIView):
+    """
+    Gestiona la autenticacion de usuarios a la plataforma via api
+    """
+    permission_classes = ()
+    
+    def post(self, request,):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = authenticate(username=username, password=password)
+        print('tamos',request.data, user)
+        if user:
+            return Response({"token": user.auth_token.key})
+        else:
+            return Response({"error": "Wrong Credentials"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def pingView(request):
