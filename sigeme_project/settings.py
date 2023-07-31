@@ -39,16 +39,23 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'rest_framework.authtoken',
+    'drf_yasg',
     'api_app'
 ]
 
-#para trabajar con rest framework
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
+        # 'rest_framework.permissions.IsAuthenticated',
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+    ),
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'DEFAULT_PAGINATION_CLASS': 'api_app.pagination.CustomPagination',
     'PAGE_SIZE': 20
 }
@@ -189,7 +196,7 @@ LOGGING = {
     },
 }
 
-#validacion de cors
+# validacion de cors
 CORS_ALLOWED_ORIGINS = [
     "https://example.com",
     "https://sub.example.com",
