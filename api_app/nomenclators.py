@@ -134,7 +134,7 @@ class TipoDepartamento(models.Model):
     division = models.OneToOneField("TipoDivision", on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.tipo} - {self.division.tipo}'
+        return f'{self.tipo}'
 
     class Meta:
         verbose_name = "departamento"
