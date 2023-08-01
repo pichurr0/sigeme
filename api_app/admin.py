@@ -8,9 +8,11 @@ from .nomenclators import TipoMarca, TipoModelo, \
 # Modelos que van a ser gestionados por el sistema.
 
 class TipoPerifericoAdmin(admin.ModelAdmin):
-    # no pueden especificarse los 2. O fieldset o fields
-    # fields = ["tipo", "slug"]
-    # readonly_fields = ["slug"]
+    """
+    no pueden especificarse los 2. O fieldset o fields
+    """
+
+    readonly_fields = ["slug"]
     fieldsets = [
         (None, {"fields": ["tipo"]}),
         ("informacion para la web", {"fields": ["slug"]}),
@@ -48,13 +50,19 @@ class TipoSistemaOperativoAdminForm(forms.ModelForm):
 
         return self.cleaned_data["tipo"]
 
+
 @admin.register(TipoSistemaOperativo)
 class TipoSistemaOperativoAdmin(admin.ModelAdmin):
-    
-    # visualizacion de campos en el formulario
+    """
+
+    configurar la vizualizacion de campos en el formulario y sus validaciones.
+
+
+    """
+
     fields = ('version', 'tipo')
 
-    #validaciones de formulario
+    # validaciones de formulario
     form = TipoSistemaOperativoAdminForm
 
     def get_form(self, request, obj=None, **kwargs):
