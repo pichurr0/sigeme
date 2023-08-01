@@ -5,8 +5,6 @@ from .nomenclators import TipoMarca, TipoModelo, \
     TipoPiso, TipoSistemaOperativo, TipoProvincia, TipoPeriferico, TipoPrograma
 
 
-# Modelos que van a ser gestionados por el sistema.
-
 class TipoPerifericoAdmin(admin.ModelAdmin):
     """
     no pueden especificarse los 2. O fieldset o fields
@@ -21,6 +19,10 @@ class TipoPerifericoAdmin(admin.ModelAdmin):
 
 @admin.register(TipoDivision)
 class TipoDivisionAdmin(admin.ModelAdmin):
+	"""
+    Adicionar informacion sobre las unidades con las que cuenta la division
+    """
+
     list_display = ("tipo", "provincia", "unidades_subordinadas")
 
     def unidades_subordinadas(self, obj):
@@ -34,12 +36,18 @@ class TipoDivisionAdmin(admin.ModelAdmin):
 
 @admin.register(TipoDepartamento)
 class TipoDepartamentoAdmin(admin.ModelAdmin):
+	"""
+	filtrado y ordeniento de los elementos listados para mejor ux
+	"""
     list_display = ("tipo", "division")
     search_fields = ("tipo__startswith", )
     list_filter = ("division__tipo",)
 
 
 class TipoSistemaOperativoAdminForm(forms.ModelForm):
+	"""
+    Modifica el comportamiento del formulario para Tipos de Sistema Operativo
+	"""
     class Meta:
         model = TipoSistemaOperativo
         fields = "__all__"
@@ -61,8 +69,6 @@ class TipoSistemaOperativoAdmin(admin.ModelAdmin):
     """
 
     fields = ('version', 'tipo')
-
-    # validaciones de formulario
     form = TipoSistemaOperativoAdminForm
 
     def get_form(self, request, obj=None, **kwargs):
