@@ -88,7 +88,7 @@ class TipoDivision(models.Model):
     """TipoDivision."""
 
     tipo = models.CharField(max_length=200)
-    provincia = models.OneToOneField("TipoProvincia", on_delete=models.CASCADE)
+    provincia = models.ForeignKey("TipoProvincia", on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = "division"
@@ -102,7 +102,7 @@ class TipoMunicipio(models.Model):
     """TipoMunicipio."""
 
     tipo = models.CharField(max_length=200)
-    provincia = models.OneToOneField("TipoProvincia", on_delete=models.CASCADE)
+    provincia = models.ForeignKey("TipoProvincia", on_delete=models.CASCADE)
 
     def __str__(self):
         return self.tipo
@@ -116,8 +116,8 @@ class TipoUnidad(models.Model):
     """TipoUnidad."""
 
     tipo = models.CharField(max_length=200)
-    division = models.OneToOneField("TipoDivision", on_delete=models.CASCADE)
-    municipio = models.OneToOneField("TipoMunicipio", on_delete=models.CASCADE)
+    division = models.ForeignKey("TipoDivision", on_delete=models.CASCADE)
+    municipio = models.ForeignKey("TipoMunicipio", on_delete=models.CASCADE)
 
     def __str__(self):
         return self.tipo
@@ -131,7 +131,7 @@ class TipoDepartamento(models.Model):
     """revisar con daydee si esto realmente es asi,  parar dpto y piso."""
 
     tipo = models.CharField(max_length=200)
-    division = models.OneToOneField("TipoDivision", on_delete=models.CASCADE)
+    division = models.ForeignKey("TipoDivision", on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.tipo}'
@@ -145,7 +145,7 @@ class TipoPiso(models.Model):
     """TipoPiso."""
 
     tipo = models.CharField(max_length=200)
-    unidad = models.OneToOneField("TipoUnidad", on_delete=models.CASCADE)
+    unidad = models.ForeignKey("TipoUnidad", on_delete=models.CASCADE)
 
     def __str__(self):
         return self.tipo
@@ -184,6 +184,7 @@ class TipoPrograma(models.Model):
     class Meta:
         verbose_name = "programa"
         verbose_name_plural = "programas"
+
 
 class TipoSistemaOperativo(models.Model):
     """Sistemas Operativos."""

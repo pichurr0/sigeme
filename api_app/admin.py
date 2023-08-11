@@ -1,4 +1,8 @@
+import random
 from django import forms
+from django.urls import reverse
+from django.utils.http import urlencode
+from django.utils.html import format_html
 from django.contrib import admin
 from .nomenclators import TipoMarca, TipoModelo, \
     TipoDivision, TipoMunicipio, TipoUnidad, TipoDepartamento, \
@@ -16,18 +20,20 @@ class TipoPerifericoAdmin(admin.ModelAdmin):
         ("informacion para la web", {"fields": ["slug"]}),
     ]
 
+admin.site.register(TipoPeriferico, TipoPerifericoAdmin)
+
 
 @admin.register(TipoDivision)
 class TipoDivisionAdmin(admin.ModelAdmin):
-	"""
+    """
     Adicionar informacion sobre las unidades con las que cuenta la division
     """
-
+    
     list_display = ("tipo", "provincia", "unidades_subordinadas")
+    list_display_links = ('tipo',)
 
     def unidades_subordinadas(self, obj):
         from django.db.models import Count
-        from django.utils.html import format_html
         result = TipoUnidad.objects.filter(division=obj).aggregate(Count("id"))
         return format_html("<b><i>{}</i></b>", result["id__count"])
 
@@ -36,7 +42,7 @@ class TipoDivisionAdmin(admin.ModelAdmin):
 
 @admin.register(TipoDepartamento)
 class TipoDepartamentoAdmin(admin.ModelAdmin):
-	"""
+    """
 	filtrado y ordeniento de los elementos listados para mejor ux
 	"""
     list_display = ("tipo", "division")
@@ -45,9 +51,10 @@ class TipoDepartamentoAdmin(admin.ModelAdmin):
 
 
 class TipoSistemaOperativoAdminForm(forms.ModelForm):
-	"""
+    """
     Modifica el comportamiento del formulario para Tipos de Sistema Operativo
-	"""
+    """
+
     class Meta:
         model = TipoSistemaOperativo
         fields = "__all__"
@@ -62,9 +69,7 @@ class TipoSistemaOperativoAdminForm(forms.ModelForm):
 @admin.register(TipoSistemaOperativo)
 class TipoSistemaOperativoAdmin(admin.ModelAdmin):
     """
-
     configurar la vizualizacion de campos en el formulario y sus validaciones.
-
 
     """
 
@@ -77,11 +82,31 @@ class TipoSistemaOperativoAdmin(admin.ModelAdmin):
         return form
 
 
-admin.site.register(TipoPeriferico, TipoPerifericoAdmin)
+@admin.register(TipoUnidad)
+class TipoUnidadAdmin(admin.ModelAdmin):
+    """
+    Configurar enlace para que el ultimo elemento de la tabla redireccione a division
+
+    """
+
+    list_display = ('tipo', 'municipio', 'division', 'view_division_link')
+    empty_value_display = "--seleccione--"
+
+    def view_division_link(self, obj):
+        count = random.randint(1, 10)
+        url = (
+            reverse("admin:api_app_tipodivision_changelist")
+            + "?"
+            # + urlencode({"tipounidad__id": f"{obj.id}"})
+            + urlencode({"id": f"{obj.division.id}"})
+        )
+        return format_html('<a href="{}">Apunta a ID Division {} </a>', url, obj.division.id)
+
+    view_division_link.short_description = "Link Division"
+
 admin.site.register(TipoMarca)
 admin.site.register(TipoModelo)
 admin.site.register(TipoProvincia)
 admin.site.register(TipoMunicipio)
-admin.site.register(TipoUnidad)
 admin.site.register(TipoPiso)
 admin.site.register(TipoPrograma)
