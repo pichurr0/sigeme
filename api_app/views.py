@@ -1,15 +1,12 @@
 import logging
-from django.shortcuts import render
-from django.http import HttpResponse
 from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets, status, generics, views
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from .serializer import UserSerializer, MedioSerializer, ComponenteSerializer,\
-EquipoSerializer, PerifericoSerializer, ComputadoraSerializer
-from .models import Medio, Componente, Equipo, Periferico, Computadora
+from .serializer import UserSerializer, ComponenteSerializer, EquipoSerializer, \
+ PerifericoSerializer, ComputadoraSerializer
+from .models import Componente, Equipo, Periferico, Computadora
 
 
 logger = logging.getLogger(__name__)
@@ -133,11 +130,3 @@ class LoginView(views.APIView):
             return Response({"token": user.auth_token.key})
         else:
             return Response({"error": "Wrong Credentials"}, status=status.HTTP_400_BAD_REQUEST)
-
-
-def pingView(request):
-    return HttpResponse('ping...')    
-
-
-def testingView(request):
-    return render('testing...')    
