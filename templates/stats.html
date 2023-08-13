@@ -5,16 +5,30 @@
         <title>
             Statistics
         </title>
+        <style type="text/css">
+            .number{
+                font-weight: 700;
+                font-size: 50px;
+                text-align: center;
+                margin-left: 25%;
+                font-family: arial;
+            }
+
+            .list{
+                display: inline-block;
+                padding: 0 7% 0 7%; 
+            }
+        </style>
     </head>
     <body>
         
 <h1>Estadisticas</h1>
         </br>
-<ul>
-	<li><span>Total de usuarios: </span><span id="users" >0</span></li>
-	<li><span>Total de medios: </span><span id="mediums">0</span></li>
-    <li><span>Total de movimientos: </span><span id="moves">0</span></li>
-	<li><span>Total de programas: </span><span id="programs">0</span></li>
+<div style="width:100%">
+	<div class="list"><h2>Usuarios: </h2><span class="number" id="users" >0</span></div>
+	<div class="list"><h2> Medios: </h2><span class="number" id="mediums">0</span></div>
+    <div class="list"><h2> Movimientos: </h2><span class="number" id="moves">0</span></div>
+	<div class="list"><h2> Programas: </h2><span class="number" id="programs">0</span></div>
 </ul>
 <script>
 
