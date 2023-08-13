@@ -1,16 +1,56 @@
+import asyncio
+import random
 import json
-from channels.generic.websocket import WebsocketConsumer
+from django.contrib.auth.models import User
+from channels.db import database_sync_to_async
+from api_app.nomenclators import TipoPrograma
+from api_app.models import Medio, Movimiento
+from channels.consumer import AsyncConsumer
 
 
-class ChatConsumer(WebsocketConsumer):
-    
-    def connect(self):
-        self.accept()
+class Consumer(AsyncConsumer):
 
-    def disconnect(self, close_code):
-        pass
+    async def websocket_connect(self, event):
+        self.connected = True
+        # print("connected", event)
 
-    def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
-        self.send(text_data=json.dumps({"message": message}))
+        # indica que se acepta la conexion
+        await self.send({
+            "type": "websocket.accept"
+        })
+
+        while self.connected:
+            await asyncio.sleep(10)  # continuar cada 3 segundos
+
+            # ERROR Exception inside application: You cannot call this
+            # from an async context - use a thread or sync_to_async.
+            programs = await database_sync_to_async(self.get_total_programs)()
+            mediums = await database_sync_to_async(self.get_total_mediums)()
+            moves = await database_sync_to_async(self.get_total_moves)()
+            users = await database_sync_to_async(self.get_total_users)()
+            # total = 
+
+            # print(total)
+            await self.send({
+                'type': 'websocket.send',
+                'text': json.dumps({
+                    "programs": programs,
+                    "mediums": mediums}),
+            })
+
+    def  get_total_programs(self):
+        return TipoPrograma.objects.count()
+
+    def  get_total_mediums(self):
+        return Medio.objects.count()
+
+    def  get_total_moves(self):
+        return Movimiento.objects.count()
+
+    def  get_total_users(self):
+        return random.randint(0, 10)
+
+    async def disconnect(self, close_code):
+        print('disconnect, ',close_code)
+        self.connected = False
+ 
