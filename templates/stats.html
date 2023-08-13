@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>
+            Statistics
+        </title>
+    </head>
+    <body>
+        
+<h1>Estadisticas</h1>
+        </br>
+<ul>
+	<li><span>Total de usuarios: </span><span id="users" >0</span></li>
+	<li><span>Total de medios: </span><span id="mediums">0</span></li>
+    <li><span>Total de movimientos: </span><span id="moves">0</span></li>
+	<li><span>Total de programas: </span><span id="programs">0</span></li>
+</ul>
+<script>
+
+
+// necesito que el servidor actualice automaticamente al cliente nadamas inicialice comunicacion con el cliente
+
+var loc = window.location;
+var wsStart = 'ws://';
+if (loc.protocol == 'https:') {
+    wsStart = 'wss://'
+}
+var endpoint = `${wsStart}${window.location.host}/ws/stats/`;
+const socket = new WebSocket(endpoint);
+console.log('111')
+
+socket.onmessage = function(e) {
+
+    console.log('ha llegado un nuevo mensaje', e)
+    const data = JSON.parse(e.data);
+    document.querySelector('#programs').innerText = data.programs;
+    document.querySelector('#mediums').innerText = data.mediums;
+    document.querySelector('#users').innerText = data.users;
+    document.querySelector('#moves').innerText = data.moves;
+};
+
+socket.onopen = function(e) {
+    console.log('conectando')
+    // socket.send('hello from client')
+};
+
+socket.onclose = function(event) {
+  if (event.wasClean) {
+    console.log(`[close] Conexión cerrada limpiamente, código=${event.code} motivo=${event.reason}`);
+  } else {
+    // ej. El proceso del servidor se detuvo o la red está caída
+    // event.code es usualmente 1006 en este caso
+    console.log(`[close] La conexión se cayó,  código=${event.code}`);
+  }
+};
+
+socket.onerror = function(error) {
+  console.log(`[error]`, error);
+};
+
+
+</script>
+    </body>
+</html>
