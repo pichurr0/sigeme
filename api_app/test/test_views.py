@@ -1,5 +1,7 @@
 from sigeme_project import logger
-from django.test import TestCase, RequestFactory, Client, tag
+from django.contrib.auth.models import User
+from rest_framework.authtoken.models import Token
+from django.test import TestCase, Client, tag
 from ..models import Equipo, Computadora, Ubicacion, Periferico, Componente, \
       Movimiento, MovimientoComponente
 from ..nomenclators import TipoPeriferico, TipoMarca, TipoModelo, \
@@ -9,17 +11,30 @@ from ..nomenclators import TipoPeriferico, TipoMarca, TipoModelo, \
 # en caso de necesitar validacion para csrf, pasar parametro al client
 # csrf_client = Client(enforce_csrf_checks=True)
 
+class AuthenticationTestUtil:
+
+    def make_login(self):
+        self.client = Client()
+        self.credentials = {"email": "usuario@mail.com", "username": "usuario", "password": "usuario"}
+        self.user = User.objects.create(**self.credentials)
+        self.user.set_password(self.credentials.get('password'))
+        self.user.save()
+        # en caso de no  crear un token para el usuario
+        # django.contrib.auth.models.User.auth_token.RelatedObjectDoesNotExist: User has no auth_token.
+        self.token = Token.objects.create(user=self.user)
+
 
 @tag('core')
-class ResponseFormatTestCase(TestCase):
+class ResponseFormatTestCase(TestCase, AuthenticationTestUtil):
     """ Test relacionados a Equipos"""
 
     def setUp(self):
         self.client = Client()
+        self.make_login()
 
     def test_formato_respuesta(self):
 
-        response = self.client.get("/api/medios/")
+        response = self.client.get("/api/medios/", headers={'AUTHORIZATION': f'Token {self.token.key}'})
 
         content = response.content
         context = response.context
@@ -35,7 +50,7 @@ class ResponseFormatTestCase(TestCase):
 
 
 @tag('api')
-class EquipoTestCase(TestCase):
+class EquipoTestCase(TestCase, AuthenticationTestUtil):
     """Test sobre los endpoint de equipo"""
 
     path = 'equipos'
@@ -88,11 +103,10 @@ class EquipoTestCase(TestCase):
         modelo=modelo
     	)
         self._instance.save()
-
-        self.client = Client()
+        self.make_login()
 
     def test_1_crear_equipo(self):
-        response = self.client.post(f"/api/{self.path}/", self.data, content_type='application/json')
+        response = self.client.post(f"/api/{self.path}/", self.data, content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         item = response.json()
 
         self.assertTrue(item.get('tipo') == self.data.get('tipo'))
@@ -100,7 +114,7 @@ class EquipoTestCase(TestCase):
         self.assertTrue(Equipo.objects.count() == 2)
 
     def test_2_obtener_equipo(self):
-        response = self.client.get(f"/api/{self.path}/1/", content_type='application/json')
+        response = self.client.get(f"/api/{self.path}/1/", content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
         item = response.json()
 
@@ -112,7 +126,7 @@ class EquipoTestCase(TestCase):
     def test_3_actualizar_equipo(self):
         updated = {'id': 1, 'inventario': 'inventario actualizado'}
         self.data = {**self.data, **updated}
-        response = self.client.put(f"/api/{self.path}/1/", self.data, content_type='application/json')
+        response = self.client.put(f"/api/{self.path}/1/", self.data, content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
         item = response.json()
 
@@ -122,7 +136,7 @@ class EquipoTestCase(TestCase):
         self.assertTrue(Movimiento.objects.count() == 1)
 
     def test_4_eliminar_equipo(self):
-        response = self.client.delete(f"/api/{self.path}/1/")
+        response = self.client.delete(f"/api/{self.path}/1/", headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
 
         self.assertEqual(code, 204)
@@ -131,9 +145,8 @@ class EquipoTestCase(TestCase):
         except Equipo.DoesNotExist:
             self.assertTrue(1) 
 
-
     def test_5_listar_equipos(self):
-        response = self.client.get(f"/api/{self.path}/")
+        response = self.client.get(f"/api/{self.path}/", headers={'AUTHORIZATION': f'Token {self.token.key}'})
         data = response.json()
         code = response.status_code
 
@@ -141,7 +154,7 @@ class EquipoTestCase(TestCase):
         self.assertTrue(data['total'] == 1)
 
 @tag('api')
-class PerifericoTestCase(TestCase):
+class PerifericoTestCase(TestCase, AuthenticationTestUtil):
     """Test sobre los endpoint de perifericos"""
 
     path = 'perifericos'
@@ -201,10 +214,10 @@ class PerifericoTestCase(TestCase):
     	)
         self._instance.save()
 
-        self.client = Client()
+        self.make_login()
     
     def test_1_crear_periferico(self):
-        response = self.client.post(f"/api/{self.path}/", self.data, content_type='application/json')
+        response = self.client.post(f"/api/{self.path}/", self.data, content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         item = response.json()
         
         self.assertTrue(item.get('tipo') == self.data.get('tipo'))
@@ -212,7 +225,7 @@ class PerifericoTestCase(TestCase):
         self.assertTrue(Periferico.objects.count() == 2)
 
     def test_2_obtener_periferico(self):
-        response = self.client.get(f"/api/{self.path}/1/", content_type='application/json')
+        response = self.client.get(f"/api/{self.path}/1/", content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
         item = response.json()
 
@@ -224,7 +237,7 @@ class PerifericoTestCase(TestCase):
     def test_3_actualizar_periferico(self):
         updated = {'id': 1, 'serie': 'la nueva serie'}
         self.data = {**self.data, **updated}
-        response = self.client.put(f"/api/{self.path}/1/", self.data, content_type='application/json')
+        response = self.client.put(f"/api/{self.path}/1/", self.data, content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
         item = response.json()
 
@@ -234,7 +247,7 @@ class PerifericoTestCase(TestCase):
         self.assertTrue(Movimiento.objects.count() == 1)
     
     def test_4_eliminar_periferico(self):
-        response = self.client.delete(f"/api/{self.path}/1/")
+        response = self.client.delete(f"/api/{self.path}/1/", headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
 
         self.assertEqual(code, 204)
@@ -244,7 +257,7 @@ class PerifericoTestCase(TestCase):
             self.assertTrue(1) 
         
     def test_5_listar_Perifericos(self):
-        response = self.client.get(f"/api/{self.path}/")
+        response = self.client.get(f"/api/{self.path}/", headers={'AUTHORIZATION': f'Token {self.token.key}'})
         data = response.json()
         code = response.status_code
 
@@ -252,7 +265,7 @@ class PerifericoTestCase(TestCase):
         self.assertTrue(data['total'] == 1)
 
 @tag('api')
-class ComputadoraTestCase(TestCase):
+class ComputadoraTestCase(TestCase, AuthenticationTestUtil):
     """Test sobre los endpoint de computadoras"""
 
     path = 'computadoras'
@@ -322,10 +335,10 @@ class ComputadoraTestCase(TestCase):
     	)
         self._instance.save()
 
-        self.client = Client()
+        self.make_login()
     
     def test_1_crear_computadora(self):
-        response = self.client.post(f"/api/{self.path}/", self.data, content_type='application/json')
+        response = self.client.post(f"/api/{self.path}/", self.data, content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         item = response.json()
         
         self.assertTrue(item.get('tipo') == self.data.get('tipo'))
@@ -333,7 +346,7 @@ class ComputadoraTestCase(TestCase):
         self.assertTrue(Computadora.objects.count() == 2)
 
     def test_2_obtener_computadora(self):
-        response = self.client.get(f"/api/{self.path}/1/", content_type='application/json')
+        response = self.client.get(f"/api/{self.path}/1/", content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
         item = response.json()
 
@@ -345,7 +358,7 @@ class ComputadoraTestCase(TestCase):
     def test_3_actualizar_computadora(self):
         updated = {'id': 1, 'estado_sello': TipoEstadoSello.SIN_SELLO}
         self.data = {**self.data, **updated}
-        response = self.client.put(f"/api/{self.path}/1/", self.data, content_type='application/json')
+        response = self.client.put(f"/api/{self.path}/1/", self.data, content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
         item = response.json()
 
@@ -355,7 +368,7 @@ class ComputadoraTestCase(TestCase):
         self.assertTrue(Movimiento.objects.count() == 1)
     
     def test_4_eliminar_computadora(self):
-        response = self.client.delete(f"/api/{self.path}/1/")
+        response = self.client.delete(f"/api/{self.path}/1/", headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
 
         self.assertEqual(code, 204)
@@ -365,7 +378,7 @@ class ComputadoraTestCase(TestCase):
             self.assertTrue(1)
         
     def test_5_listar_computadoras(self):
-        response = self.client.get(f"/api/{self.path}/")
+        response = self.client.get(f"/api/{self.path}/", headers={'AUTHORIZATION': f'Token {self.token.key}'})
         data = response.json()
         code = response.status_code
 
@@ -374,7 +387,7 @@ class ComputadoraTestCase(TestCase):
 
 
 @tag('api')
-class ComponenteTestCase(TestCase):
+class ComponenteTestCase(TestCase, AuthenticationTestUtil):
     """Test sobre los endpoint de computadoras"""
 
     path = 'componentes'
@@ -484,10 +497,10 @@ class ComponenteTestCase(TestCase):
         self._instance_computadora2.save()
         self._instance.save()
 
-        self.client = Client()
+        self.make_login()
     
     def test_1_crear_componente(self):
-        response = self.client.post(f"/api/{self.path}/", self.data, content_type='application/json')
+        response = self.client.post(f"/api/{self.path}/", self.data, content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         item = response.json()
         
         self.assertTrue(item.get('tipo') == self.data.get('tipo'))
@@ -496,7 +509,7 @@ class ComponenteTestCase(TestCase):
         self.assertTrue(Componente.objects.count() == 2)
 
     def test_2_obtener_componente(self):
-        response = self.client.get(f"/api/{self.path}/3/", content_type='application/json')
+        response = self.client.get(f"/api/{self.path}/3/", content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
         item = response.json()
 
@@ -508,7 +521,7 @@ class ComponenteTestCase(TestCase):
     def test_3_actualizar_componente(self):
         updated = {'id': 2, 'capacidad': '2TB'}
         self.data = {**self.data, **updated}
-        response = self.client.put(f"/api/{self.path}/3/", self.data, content_type='application/json')
+        response = self.client.put(f"/api/{self.path}/3/", self.data, content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
         item = response.json()
         logger.info('tremendo')
@@ -520,7 +533,7 @@ class ComponenteTestCase(TestCase):
         logger.info('test_3_actualizar_computadora_asociada')
         updated = {'id': 3, 'medio': 2}
         self.data = {**self.data, **updated}
-        response = self.client.put(f"/api/{self.path}/3/", self.data, content_type='application/json')
+        response = self.client.put(f"/api/{self.path}/3/", self.data, content_type='application/json', headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
         item = response.json()
         
@@ -530,7 +543,7 @@ class ComponenteTestCase(TestCase):
         self.assertTrue(MovimientoComponente.objects.count() == 1)
     
     def test_4_eliminar_componente(self):
-        response = self.client.delete(f"/api/{self.path}/3/")
+        response = self.client.delete(f"/api/{self.path}/3/", headers={'AUTHORIZATION': f'Token {self.token.key}'})
         code = response.status_code
 
         self.assertEqual(code, 204)
@@ -540,7 +553,7 @@ class ComponenteTestCase(TestCase):
             self.assertTrue(1) 
         
     def test_5_listar_componentes(self):
-        response = self.client.get(f"/api/{self.path}/")
+        response = self.client.get(f"/api/{self.path}/", headers={'AUTHORIZATION': f'Token {self.token.key}'})
         data = response.json()
         code = response.status_code
 
