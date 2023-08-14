@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
-from django.urls import reverse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,13 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'daphne',  # siempre antes de static files
+    # 'chat_app',
+    'stats_app',
     'django.contrib.staticfiles',
     'channels',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
     'drf_yasg',
-    'api_app'
+    'api_app',
 ]
 
 REST_FRAMEWORK = {
@@ -92,7 +93,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'sigeme_project.wsgi.application'
+# WSGI_APPLICATION = 'sigeme_project.wsgi.application'
 
 ASGI_APPLICATION = 'sigeme_project.asgi.application'
 
@@ -104,6 +105,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        "TEST": {
+            "NAME": BASE_DIR / "db.sqlite3",
+            },
     }
 }
 
@@ -220,4 +224,11 @@ SWAGGER_SETTINGS = {
     'OPERATIONS_SORTER': 'alpha',
     'SUPPORTED_SUBMIT_METHODS': ['get', 'post', 'delete']
    
+}
+
+# capas de canales que evitan el uso de persistencia en base de datos
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
