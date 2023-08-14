@@ -29,7 +29,6 @@ class ResponseFormatTestCase(TestCase, AuthenticationTestUtil):
     """ Test relacionados a Equipos"""
 
     def setUp(self):
-        self.client = Client()
         self.make_login()
 
     def test_formato_respuesta(self):
@@ -404,7 +403,6 @@ class ComponenteTestCase(TestCase, AuthenticationTestUtil):
     "sello": "# de sello",
     "medio": 1,
     "tipo_componente": "disco",
-
     }
 
     data_computadora = {"tipo": "computadora", "estado": "bien",
