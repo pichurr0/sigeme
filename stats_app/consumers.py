@@ -1,5 +1,4 @@
 import asyncio
-import random
 import json
 from django.contrib.auth.models import User
 from channels.db import database_sync_to_async
@@ -55,6 +54,5 @@ class Consumer(AsyncConsumer):
         return User.objects.count()
 
     async def disconnect(self, close_code):
-        print('disconnect, ',close_code)
         self.connected = False
  
